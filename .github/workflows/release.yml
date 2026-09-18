@@ -70,6 +70,14 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      # Accept all SDK licenses and pre-install the exact packages the build
+      # needs. Without this, the Android Gradle Plugin tries to auto-download
+      # build-tools/platform and fails because their licenses are not accepted.
+      - name: Accept licenses and install Android SDK packages
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
