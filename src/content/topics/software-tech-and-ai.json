@@ -1,0 +1,27 @@
+{
+  "id": "software-tech-and-ai",
+  "name": "Software, tech & AI",
+  "description": "Everyday truths about writing code, shipping software, and machine learning.",
+  "sentences": [
+    "Clean code reads like well written prose, clear enough that comments feel almost unneeded.",
+    "A good API is easy to use correctly and genuinely hard to use by mistake.",
+    "Version control lets a whole team edit one project without stepping on each other.",
+    "Caching is one of the two hard problems in computing, along with naming things.",
+    "Every bug caught in testing is a support ticket that never has to be written.",
+    "A large language model predicts the next token based on the patterns it has seen.",
+    "Machine learning finds structure in data that no one took the time to spell out.",
+    "Shipping a small change today often beats waiting months for the perfect release.",
+    "The cloud is really just someone else's computer that you rent by the hour.",
+    "Good documentation is a gift you leave for the exhausted version of your future self.",
+    "Premature optimization wastes effort on problems the program may never actually have.",
+    "A neural network learns by adjusting millions of weights one small step at a time.",
+    "Automated tests give you the courage to change code without holding your breath.",
+    "Latency is the delay a user feels, and users notice every wasted millisecond.",
+    "Open source software runs quietly beneath almost every app on your phone.",
+    "A model is only ever as good as the data it was trained on, flaws and all.",
+    "Refactoring improves the shape of the code without changing what it actually does.",
+    "The hardest part of programming is often understanding the problem, not the syntax.",
+    "Encryption turns readable messages into noise that only the right key can undo.",
+    "Progress in AI tends to arrive in sudden, uneven leaps rather than a smooth line."
+  ]
+}
