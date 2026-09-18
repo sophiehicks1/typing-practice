@@ -32,6 +32,19 @@ npm run preview  # preview the production build locally
 The build in `dist/` is fully static and can be hosted anywhere (GitHub Pages,
 Netlify, an S3 bucket, etc.).
 
+## Download a prebuilt version
+
+Every push to `main` builds the site and publishes it as a downloadable zip on a
+GitHub Release. The latest build is always available here:
+
+- **[Download the latest build](https://github.com/sophiehicks1/typing-practice/releases/latest)**
+  -- grab `typing-practice-build.zip`, unzip it, and open `index.html` (or serve
+  the folder with any static file server).
+
+You can also trigger a build manually from the **Actions** tab
+(_Release build_ -> _Run workflow_). The build is attached both to the Release
+and as a workflow artifact on the run.
+
 ## What can I change, and where?
 
 | I want to...                            | Go to                                   |

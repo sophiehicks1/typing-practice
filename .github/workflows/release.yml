@@ -1,0 +1,61 @@
+name: Release build
+
+# Builds the static site and publishes it as a downloadable zip on a GitHub
+# Release. The newest run is always marked as "latest", so the current build is
+# available at:
+#
+#   https://github.com/sophiehicks1/typing-practice/releases/latest
+#
+# Runs automatically on every push to main, and can be triggered by hand from
+# the Actions tab (Run workflow).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Needed so the workflow can create/update Releases.
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Fail the release if the code is broken, so we never publish a bad build.
+      - run: npm test
+
+      - run: npm run build
+
+      - name: Package the build
+        run: cd dist && zip -r ../typing-practice-build.zip .
+
+      # Also upload the build as a workflow artifact (handy for pull requests,
+      # which do not create Releases).
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: typing-practice-build
+          path: dist
+
+      - name: Publish to a GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Build ${{ github.run_number }}
+          body: |
+            Automated static build from commit ${{ github.sha }}.
+
+            Download `typing-practice-build.zip` below, unzip it, and open
+            `index.html` (or serve the folder) to run the typing test.
+          make_latest: true
+          files: typing-practice-build.zip
