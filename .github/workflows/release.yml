@@ -1,26 +1,37 @@
 name: Release build
 
-# Builds the static site and publishes it as a downloadable zip on a GitHub
-# Release. The newest run is always marked as "latest", so the current build is
-# available at:
+# Builds the static site (as a single self-contained HTML file) and an
+# installable Android APK, then publishes them to a GitHub Release. The newest
+# run is always marked as "latest", so the current build is available at:
 #
 #   https://github.com/sophiehicks1/typing-practice/releases/latest
 #
-# Runs automatically on every push to main, and can be triggered by hand from
-# the Actions tab (Run workflow).
+# Runs automatically on every push to main and can be triggered by hand from the
+# Actions tab (Run workflow). It also runs on pull requests to validate that both
+# the web build and the APK still build.
+#
+# Security: the workflow runs untrusted PR code (npm lifecycle scripts, the
+# build), so it must never expose a write token to it. The default token is
+# read-only (see the top-level `permissions`), the `build` job stays read-only,
+# and only the separate `publish` job -- which runs no PR code, just downloads
+# the already-built artifacts -- is granted `contents: write`. `publish` never
+# runs for pull requests.
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
-# Needed so the workflow can create/update Releases.
+# Least privilege by default; the publish job opts up to write.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -31,26 +42,86 @@ jobs:
 
       - run: npm ci
 
-      # Fail the release if the code is broken, so we never publish a bad build.
+      # Fail the build if the code is broken, so we never publish a bad release.
       - run: npm test
 
       - run: npm run build
 
-      # The build is a single self-contained index.html (JS + CSS inlined), so
-      # it runs by simply opening it -- no server needed. Offer it both as a
+      # ----- Web packaging -----
+      # The build is a single self-contained index.html (JS + CSS inlined), so it
+      # runs by simply opening it -- no server needed. Offer it both as a
       # standalone file and as a zip.
-      - name: Package the build
+      - name: Package the web build
         run: |
           cp dist/index.html typing-practice.html
           cd dist && zip -r ../typing-practice-build.zip .
 
-      # Also upload the build as a workflow artifact (handy for pull requests,
-      # which do not create Releases).
-      - name: Upload build artifact
+      # ----- Android APK -----
+      # The APK is a thin WebView wrapper around the same index.html, so it runs
+      # fully offline. It is signed with the committed stable debug keystore
+      # (not a secret) -- enough to sideload, and consistent across releases so
+      # installs update in place.
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          # The action's default package set includes the obsolete "tools"
+          # package, which no longer exists and makes setup fail. Install nothing
+          # here; the next step installs exactly what the build needs.
+          packages: ""
+
+      # Accept all SDK licenses and pre-install the exact packages the build
+      # needs. Without this, the Android Gradle Plugin tries to auto-download
+      # build-tools/platform and fails because their licenses are not accepted.
+      - name: Accept licenses and install Android SDK packages
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Copy web build into Android assets
+        run: cp dist/index.html android/app/src/main/assets/index.html
+
+      - name: Build debug APK
+        working-directory: android
+        run: gradle assembleDebug --no-daemon
+
+      - name: Collect APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk typing-practice.apk
+
+      # Available on every run, including pull requests.
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: typing-practice-build
-          path: dist
+          path: |
+            typing-practice.html
+            typing-practice-build.zip
+            typing-practice.apk
+
+  publish:
+    # Publishing needs write access, so keep it in a job that runs NO PR code --
+    # it only downloads the artifacts the build job already produced.
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: typing-practice-build
+          path: .
 
       - name: Publish to a GitHub Release
         uses: softprops/action-gh-release@v2
@@ -58,13 +129,17 @@ jobs:
           tag_name: build-${{ github.run_number }}
           name: Build ${{ github.run_number }}
           body: |
-            Automated static build from commit ${{ github.sha }}.
+            Automated build from commit ${{ github.sha }}.
 
-            The build is a single self-contained file. Download
-            `typing-practice.html` below and just open it in your browser --
-            no server or unzipping required. (`typing-practice-build.zip`
-            contains the same file if you prefer a zip.)
+            - `typing-practice.html` -- the whole app in one file. Download it and
+              open it in any browser (no server or unzip needed).
+            - `typing-practice.apk` -- installable Android app (a WebView wrapper,
+              runs offline). Sideload it: enable "install unknown apps" for your
+              browser/file manager, then open the APK. It is debug-signed with a
+              stable key, so later releases update in place.
+            - `typing-practice-build.zip` -- the same web build as a zip.
           make_latest: true
           files: |
             typing-practice.html
             typing-practice-build.zip
+            typing-practice.apk

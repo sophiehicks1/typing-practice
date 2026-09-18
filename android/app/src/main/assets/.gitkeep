@@ -1,0 +1,4 @@
+# The web build (a single self-contained index.html) is copied into this folder
+# at build time -- see the "Copy web build into Android assets" step in
+# .github/workflows/release.yml, or run the commands in android/README.md to
+# build the APK locally. index.html itself is intentionally not committed here.

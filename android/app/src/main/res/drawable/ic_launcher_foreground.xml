@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Adaptive-icon foreground: a simple white "T" (for Typing) centered on the
+  108x108dp canvas, kept within the inner 72dp safe zone. Pure vector, no
+  bitmaps, so it stays crisp at every density.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,40 h32 v7 h-12.5 v28 h-7 v-28 h-12.5 z" />
+</vector>
