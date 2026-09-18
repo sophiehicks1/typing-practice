@@ -34,13 +34,21 @@ Netlify, an S3 bucket, etc.).
 
 ## Download a prebuilt version
 
-Every push to `main` builds the site and publishes it to a GitHub Release. The
-build is a **single self-contained `index.html`** (all JS and CSS are inlined),
-so you can just open it -- no server needed. The latest build is always here:
+Every push to `main` builds the app and publishes it to a GitHub Release. The
+latest build is always here:
 
 - **[Download the latest build](https://github.com/sophiehicks1/typing-practice/releases/latest)**
-  -- grab `typing-practice.html` and open it in your browser (double-click works).
-  A `typing-practice-build.zip` with the same file is attached too, if you prefer.
+
+Each release includes:
+
+- `typing-practice.html` -- the **whole app in a single self-contained file** (all
+  JS and CSS inlined). Download it and open it in any browser; double-click works,
+  no server needed.
+- `typing-practice.apk` -- an **installable Android app** (a thin WebView wrapper
+  around the same file; runs offline, no permissions). Since it is not on the Play
+  Store, sideload it: enable "install unknown apps" for your browser or file
+  manager, then open the APK. It is debug-signed. See [`android/`](android/).
+- `typing-practice-build.zip` -- the same web build as a zip.
 
 You can also trigger a build manually from the **Actions** tab
 (_Release build_ -> _Run workflow_). The build is attached both to the Release
@@ -94,6 +102,7 @@ src/
   styles.css       all styling
 test/              one test file per module
 docs/              architecture + contributor guides
+android/           minimal Android WebView wrapper (builds the installable APK)
 ```
 
 See [`docs/architecture.md`](docs/architecture.md) for how the pieces fit

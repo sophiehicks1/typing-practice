@@ -1,17 +1,20 @@
 name: Release build
 
-# Builds the static site and publishes it as a downloadable zip on a GitHub
-# Release. The newest run is always marked as "latest", so the current build is
-# available at:
+# Builds the static site (as a single self-contained HTML file) and an
+# installable Android APK, then publishes them to a GitHub Release. The newest
+# run is always marked as "latest", so the current build is available at:
 #
 #   https://github.com/sophiehicks1/typing-practice/releases/latest
 #
-# Runs automatically on every push to main, and can be triggered by hand from
-# the Actions tab (Run workflow).
+# Runs automatically on every push to main and can be triggered by hand from the
+# Actions tab (Run workflow). It also runs on pull requests to validate that both
+# the web build and the APK still build -- but the "Publish to a GitHub Release"
+# step is skipped for pull requests (they only get workflow artifacts).
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 # Needed so the workflow can create/update Releases.
@@ -36,35 +39,71 @@ jobs:
 
       - run: npm run build
 
+      # ----- Web packaging -----
       # The build is a single self-contained index.html (JS + CSS inlined), so
       # it runs by simply opening it -- no server needed. Offer it both as a
       # standalone file and as a zip.
-      - name: Package the build
+      - name: Package the web build
         run: |
           cp dist/index.html typing-practice.html
           cd dist && zip -r ../typing-practice-build.zip .
 
-      # Also upload the build as a workflow artifact (handy for pull requests,
-      # which do not create Releases).
-      - name: Upload build artifact
+      # ----- Android APK -----
+      # The APK is a thin WebView wrapper around the same index.html, so it runs
+      # fully offline. It is debug-signed (Gradle generates the debug keystore
+      # automatically), which is enough to sideload -- no secrets required.
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Copy web build into Android assets
+        run: cp dist/index.html android/app/src/main/assets/index.html
+
+      - name: Build debug APK
+        working-directory: android
+        run: gradle assembleDebug --no-daemon
+
+      - name: Collect APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk typing-practice.apk
+
+      # ----- Artifacts (available on every run, including pull requests) -----
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: typing-practice-build
-          path: dist
+          path: |
+            typing-practice.html
+            typing-practice-build.zip
+            typing-practice.apk
 
+      # ----- Publish (main / manual only; skipped for pull requests) -----
       - name: Publish to a GitHub Release
+        if: github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
           name: Build ${{ github.run_number }}
           body: |
-            Automated static build from commit ${{ github.sha }}.
+            Automated build from commit ${{ github.sha }}.
 
-            The build is a single self-contained file. Download
-            `typing-practice.html` below and just open it in your browser --
-            no server or unzipping required. (`typing-practice-build.zip`
-            contains the same file if you prefer a zip.)
+            - `typing-practice.html` -- the whole app in one file. Download it and
+              open it in any browser (no server or unzip needed).
+            - `typing-practice.apk` -- installable Android app (a WebView wrapper,
+              runs offline). Sideload it: enable "install unknown apps" for your
+              browser/file manager, then open the APK. It is debug-signed.
+            - `typing-practice-build.zip` -- the same web build as a zip.
           make_latest: true
           files: |
             typing-practice.html
             typing-practice-build.zip
+            typing-practice.apk

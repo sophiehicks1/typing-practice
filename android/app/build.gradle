@@ -1,0 +1,36 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'live.hicks.typingpractice'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'live.hicks.typingpractice'
+        // API 26 (Android 8.0) keeps the icon setup simple (adaptive icons only)
+        // and covers the overwhelming majority of active devices.
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+    }
+
+    buildTypes {
+        release {
+            // No shrinking: the app is a single Activity plus a bundled HTML
+            // asset, so there is nothing to strip.
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// No third-party dependencies: WebView ships with the Android framework, and the
+// app uses the plain android.app.Activity, so nothing extra is needed.
+dependencies {
+}
