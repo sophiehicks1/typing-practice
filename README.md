@@ -34,16 +34,22 @@ Netlify, an S3 bucket, etc.).
 
 ## Download a prebuilt version
 
-Every push to `main` builds the site and publishes it as a downloadable zip on a
-GitHub Release. The latest build is always available here:
+Every push to `main` builds the site and publishes it to a GitHub Release. The
+build is a **single self-contained `index.html`** (all JS and CSS are inlined),
+so you can just open it -- no server needed. The latest build is always here:
 
 - **[Download the latest build](https://github.com/sophiehicks1/typing-practice/releases/latest)**
-  -- grab `typing-practice-build.zip`, unzip it, and open `index.html` (or serve
-  the folder with any static file server).
+  -- grab `typing-practice.html` and open it in your browser (double-click works).
+  A `typing-practice-build.zip` with the same file is attached too, if you prefer.
 
 You can also trigger a build manually from the **Actions** tab
 (_Release build_ -> _Run workflow_). The build is attached both to the Release
 and as a workflow artifact on the run.
+
+> Note: a normal multi-file Vite build (separate `.js`/`.css`) will not run when
+> opened directly via `file://` -- browsers block ES-module scripts from the
+> local file origin. That is why the build is bundled into one file (see
+> `vite.config.js`).
 
 ## What can I change, and where?
 

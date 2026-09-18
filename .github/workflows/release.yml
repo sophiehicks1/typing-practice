@@ -36,8 +36,13 @@ jobs:
 
       - run: npm run build
 
+      # The build is a single self-contained index.html (JS + CSS inlined), so
+      # it runs by simply opening it -- no server needed. Offer it both as a
+      # standalone file and as a zip.
       - name: Package the build
-        run: cd dist && zip -r ../typing-practice-build.zip .
+        run: |
+          cp dist/index.html typing-practice.html
+          cd dist && zip -r ../typing-practice-build.zip .
 
       # Also upload the build as a workflow artifact (handy for pull requests,
       # which do not create Releases).
@@ -55,7 +60,11 @@ jobs:
           body: |
             Automated static build from commit ${{ github.sha }}.
 
-            Download `typing-practice-build.zip` below, unzip it, and open
-            `index.html` (or serve the folder) to run the typing test.
+            The build is a single self-contained file. Download
+            `typing-practice.html` below and just open it in your browser --
+            no server or unzipping required. (`typing-practice-build.zip`
+            contains the same file if you prefer a zip.)
           make_latest: true
-          files: typing-practice-build.zip
+          files: |
+            typing-practice.html
+            typing-practice-build.zip
