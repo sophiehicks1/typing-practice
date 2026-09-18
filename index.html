@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Typing Speed Test</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="status">
+        <div class="timer" id="timer">0:00</div>
+        <div class="live">
+          <div>WPM<b id="liveWpm">0</b></div>
+          <div>Accuracy<b id="liveAcc">100%</b></div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel">
+        <div id="text"></div>
+      </div>
+
+      <div class="inputWrap">
+        <textarea
+          id="input"
+          placeholder="Type here..."
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="sentences"
+          spellcheck="false"
+          disabled
+        ></textarea>
+        <div class="hint" id="hint"></div>
+      </div>
+
+      <!-- Setup -->
+      <div class="overlay" id="setup">
+        <h1>Typing Speed Test</h1>
+        <p class="sub">Copy as much of the passage as you can before the clock runs out.</p>
+        <div class="label">Choose a time</div>
+        <div class="times" id="times">
+          <div class="chip" data-sec="15">15 sec</div>
+          <div class="chip sel" data-sec="30">30 sec</div>
+          <div class="chip" data-sec="60">1 min</div>
+          <div class="chip" data-sec="120">2 min</div>
+        </div>
+        <div class="custom">
+          <span>Custom:</span>
+          <input
+            id="customSec"
+            type="number"
+            inputmode="numeric"
+            min="5"
+            max="600"
+            placeholder="sec"
+          />
+          <span>seconds</span>
+        </div>
+        <div class="picker">
+          <div class="label">Topic</div>
+          <select id="themeSel" class="select"></select>
+        </div>
+        <label class="toggle">
+          <span class="tlabel">Autocorrect<small>Let your keyboard fix spelling</small></span>
+          <input type="checkbox" id="autocorrectChk" />
+          <span class="switch"></span>
+        </label>
+        <button class="btn" id="startBtn">Start</button>
+      </div>
+
+      <!-- Results -->
+      <div class="overlay hidden" id="results">
+        <div class="score"><span id="doneNote"></span></div>
+        <div class="score" id="finalWpm">0<span> WPM</span></div>
+        <div class="grid">
+          <div class="stat err"><b id="finalErr">0</b><small>errors</small></div>
+          <div class="stat"><b id="finalAcc">0%</b><small>accuracy</small></div>
+          <div class="stat"><b id="finalChars">0</b><small>characters</small></div>
+        </div>
+        <button class="btn" id="againBtn">Try again</button>
+        <button class="btn ghost" id="changeBtn">Change time</button>
+      </div>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
