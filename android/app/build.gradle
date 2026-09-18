@@ -2,6 +2,11 @@ plugins {
     id 'com.android.application'
 }
 
+// Monotonic version derived from the CI run number, so each published APK has a
+// higher versionCode than the last (Android requires this to update in place).
+// Falls back to 1 for local builds.
+def ciRunNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+
 android {
     namespace 'live.hicks.typingpractice'
     compileSdk 34
@@ -12,11 +17,28 @@ android {
         // and covers the overwhelming majority of active devices.
         minSdk 26
         targetSdk 34
-        versionCode 1
-        versionName '1.0'
+        versionCode ciRunNumber
+        versionName "1.0.${ciRunNumber}"
+    }
+
+    signingConfigs {
+        // A committed, stable debug keystore (password is the well-known
+        // "android"). It is NOT a secret -- it only produces debug-signed APKs
+        // for sideloading. Committing it means every release is signed with the
+        // same certificate, so installs can update in place instead of Gradle
+        // minting a fresh throwaway key on each CI runner.
+        debug {
+            storeFile rootProject.file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
     }
 
     buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
         release {
             // No shrinking: the app is a single Activity plus a bundled HTML
             // asset, so there is nothing to strip.

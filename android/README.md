@@ -16,8 +16,13 @@ installable APK. It is deliberately tiny:
 `gradle assembleDebug`. The resulting APK is attached to each GitHub Release as
 `typing-practice.apk`.
 
-The APK is **debug-signed** (Gradle creates the debug keystore automatically),
-which is enough to sideload. It is not a Play Store release build -- see below.
+The APK is **debug-signed** using the committed `debug.keystore` (password is the
+well-known `android`). This is deliberately not a secret -- it only produces
+debug-signed APKs for sideloading. Committing it means every release is signed
+with the **same certificate**, so installs update in place instead of Gradle
+minting a throwaway key on each CI runner. The `versionCode` is derived from the
+CI run number so it increases with every release (Android requires a higher
+`versionCode` to update). It is not a Play Store release build -- see below.
 
 ## Build it locally
 

@@ -5,6 +5,8 @@ app/build/
 local.properties
 *.apk
 *.keystore
+# ...but the stable debug keystore is intentionally committed (not a secret).
+!debug.keystore
 
 # The web build copied in at build time (generated, not source).
 app/src/main/assets/index.html
