@@ -13,7 +13,7 @@ topics**.
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/setup.png" alt="Setup screen: choose a duration and topic, toggle autocorrect, then Start" width="30%">
+  <img src="docs/screenshots/setup.png" alt="Setup screen: choose a mode (copy a passage or free typing), a duration and topic, toggle autocorrect, then Start" width="30%">
   &nbsp;&nbsp;
   <img src="docs/screenshots/typing.png" alt="A test in progress: countdown, live WPM and accuracy, with typed text coloured green as you go" width="30%">
   &nbsp;&nbsp;
@@ -22,11 +22,12 @@ topics**.
 
 <p align="center"><em>Setup &middot; a test in progress &middot; results</em></p>
 
-From the **setup** screen you pick a time limit and a topic (and optionally let
-your keyboard autocorrect). During a **test**, the clock counts down while your
-live WPM and accuracy update and each character turns green as you type it
-correctly. When time runs out -- or you finish the passage -- the **results**
-screen shows your WPM alongside errors, accuracy, and total characters typed.
+From the **setup** screen you pick a mode (copy a passage or free typing), a time
+limit and a topic (and optionally let your keyboard autocorrect). During a
+**test**, the clock counts down while your live WPM and accuracy update and each
+character turns green as you type it correctly. When time runs out -- or you
+finish the passage -- the **results** screen shows your WPM alongside errors,
+accuracy, and total characters typed.
 
 ## Quick start
 
