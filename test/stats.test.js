@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   countCorrect,
+  countWords,
   computeWpm,
   computeAccuracy,
   computeStats,
@@ -23,6 +24,21 @@ describe("countCorrect", () => {
 
   it("returns 0 for empty typed", () => {
     expect(countCorrect("", "hello")).toBe(0);
+  });
+});
+
+describe("countWords", () => {
+  it("counts whitespace-separated words", () => {
+    expect(countWords("the quick brown fox")).toBe(4);
+  });
+
+  it("is 0 for empty or whitespace-only input", () => {
+    expect(countWords("")).toBe(0);
+    expect(countWords("   ")).toBe(0);
+  });
+
+  it("collapses runs of whitespace and ignores leading/trailing space", () => {
+    expect(countWords("  hello   world  ")).toBe(2);
   });
 });
 

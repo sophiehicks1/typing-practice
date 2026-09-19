@@ -5,7 +5,7 @@
  * the core modules, which keeps this file mostly plumbing.
  */
 import { TOPICS } from "../content/loader.js";
-import { createSession } from "../core/engine.js";
+import { createSession, createFreeSession, Mode } from "../core/engine.js";
 import { pickPassage, RANDOM_TOPIC_ID } from "../core/passage.js";
 import { remainingSeconds, formatClock } from "../core/time.js";
 import { createPassageView } from "./passage-view.js";
@@ -30,14 +30,23 @@ export function startApp() {
     liveAcc: byId("liveAcc"),
     hint: byId("hint"),
     setup: byId("setup"),
+    setupSub: byId("setupSub"),
     results: byId("results"),
     autocorrect: byId("autocorrectChk"),
+    modes: byId("modes"),
     times: byId("times"),
     customSec: byId("customSec"),
+    picker: byId("picker"),
     themeSel: byId("themeSel"),
+    resultGrid: byId("resultGrid"),
+    statErr: byId("statErr"),
+    statAcc: byId("statAcc"),
+    statWords: byId("statWords"),
+    statChars: byId("statChars"),
     finalWpm: byId("finalWpm"),
     finalErr: byId("finalErr"),
     finalAcc: byId("finalAcc"),
+    finalWords: byId("finalWords"),
     finalChars: byId("finalChars"),
     doneNote: byId("doneNote"),
     startBtn: byId("startBtn"),
@@ -45,10 +54,16 @@ export function startApp() {
     changeBtn: byId("changeBtn"),
   };
 
+  const SUB_TEXT = {
+    [Mode.PASSAGE]: "Copy as much of the passage as you can before the clock runs out.",
+    [Mode.FREE]: "Type anything you like until the clock runs out. We just measure your speed.",
+  };
+
   const passageView = createPassageView(els.text);
 
   // ----- Session state -----
   let duration = DEFAULT_DURATION;
+  let selectedMode = Mode.PASSAGE;
   let selectedTopicId = RANDOM_TOPIC_ID;
   let lastFirstId = null;
   let session = null;
@@ -98,7 +113,8 @@ export function startApp() {
   function updateLive() {
     const stats = session.stats(elapsed());
     els.liveWpm.textContent = String(stats.wpm);
-    els.liveAcc.textContent = stats.accuracy + "%";
+    // Accuracy is only meaningful when copying a passage.
+    els.liveAcc.textContent = session.mode === Mode.FREE ? "--" : stats.accuracy + "%";
   }
 
   // ----- Typing -----
@@ -111,8 +127,10 @@ export function startApp() {
 
     if (!started) startRun();
 
-    passageView.update(session);
-    passageView.revealCaret(session.typed.length);
+    if (session.mode === Mode.PASSAGE) {
+      passageView.update(session);
+      passageView.revealCaret(session.typed.length);
+    }
     updateLive();
 
     if (session.isComplete()) finish(true);
@@ -137,10 +155,22 @@ export function startApp() {
     const stats = session.stats(cappedElapsed);
 
     els.finalWpm.innerHTML = stats.wpm + "<span> WPM</span>";
-    els.finalErr.textContent = String(stats.errors);
-    els.finalAcc.textContent = stats.accuracy + "%";
     els.finalChars.textContent = String(stats.typedChars);
-    els.doneNote.textContent = completed ? "Passage finished early. Nice." : "";
+
+    const free = session.mode === Mode.FREE;
+    // Passage mode reports errors + accuracy; free mode reports words instead.
+    els.statErr.classList.toggle("is-hidden", free);
+    els.statAcc.classList.toggle("is-hidden", free);
+    els.statWords.hidden = !free;
+    els.resultGrid.classList.toggle("free", free);
+    if (free) {
+      els.finalWords.textContent = String(stats.words);
+      els.doneNote.textContent = "";
+    } else {
+      els.finalErr.textContent = String(stats.errors);
+      els.finalAcc.textContent = stats.accuracy + "%";
+      els.doneNote.textContent = completed ? "Passage finished early. Nice." : "";
+    }
 
     els.setup.classList.add("hidden");
     els.results.classList.remove("hidden");
@@ -154,6 +184,23 @@ export function startApp() {
       Array.prototype.forEach.call(els.times.children, (c) => c.classList.remove("sel"));
     }
   }
+
+  // Mode selector: "Copy a passage" vs "Free typing". Free typing hides the
+  // topic picker (there is no passage to draw from).
+  function applyMode(mode) {
+    selectedMode = mode;
+    Array.prototype.forEach.call(els.modes.children, (chip) => {
+      chip.classList.toggle("sel", chip.getAttribute("data-mode") === mode);
+    });
+    els.picker.classList.toggle("is-hidden", mode === Mode.FREE);
+    els.setupSub.textContent = SUB_TEXT[mode];
+  }
+
+  els.modes.addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip");
+    if (!chip) return;
+    applyMode(chip.getAttribute("data-mode"));
+  });
 
   els.themeSel.addEventListener("change", () => {
     selectedTopicId = els.themeSel.value;
@@ -183,9 +230,14 @@ export function startApp() {
     els.timer.classList.remove("warn");
     els.timer.textContent = formatClock(duration);
     els.liveWpm.textContent = "0";
-    els.liveAcc.textContent = "100%";
+    els.liveAcc.textContent = session.mode === Mode.FREE ? "--" : "100%";
     els.hint.textContent = "Timer starts on your first keystroke.";
-    passageView.mount(session.target);
+    if (session.mode === Mode.FREE) {
+      // No passage to copy -- show a gentle prompt in the reading panel.
+      els.text.textContent = "Free typing -- the panel stays empty. Just type below.";
+    } else {
+      passageView.mount(session.target);
+    }
     els.panel.scrollTop = 0;
   }
 
@@ -193,13 +245,17 @@ export function startApp() {
     els.results.classList.add("hidden");
     els.setup.classList.add("hidden");
 
-    const { passage, firstId } = pickPassage({
-      topics: TOPICS,
-      topicId: selectedTopicId,
-      avoidFirstId: lastFirstId,
-    });
-    lastFirstId = firstId;
-    session = createSession(passage);
+    if (selectedMode === Mode.FREE) {
+      session = createFreeSession();
+    } else {
+      const { passage, firstId } = pickPassage({
+        topics: TOPICS,
+        topicId: selectedTopicId,
+        avoidFirstId: lastFirstId,
+      });
+      lastFirstId = firstId;
+      session = createSession(passage);
+    }
 
     reset();
 

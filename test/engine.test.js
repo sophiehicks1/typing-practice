@@ -1,7 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { createSession, CharState } from "../src/core/engine.js";
+import { createSession, createFreeSession, CharState, Mode } from "../src/core/engine.js";
 
 describe("createSession", () => {
+  it("is in passage mode", () => {
+    expect(createSession("hi").mode).toBe(Mode.PASSAGE);
+  });
+
   it("requires a non-empty target", () => {
     expect(() => createSession("")).toThrow();
     expect(() => createSession(null)).toThrow();
@@ -99,5 +103,33 @@ describe("stats", () => {
     expect(stats.correctChars).toBe(5);
     expect(stats.typedChars).toBe(5);
     expect(stats.accuracy).toBe(100);
+  });
+});
+
+describe("createFreeSession", () => {
+  it("is in free mode", () => {
+    expect(createFreeSession().mode).toBe(Mode.FREE);
+  });
+
+  it("stores whatever is typed, unclamped", () => {
+    const s = createFreeSession();
+    s.setTyped("anything at all, even really long text");
+    expect(s.typed).toBe("anything at all, even really long text");
+  });
+
+  it("never completes on its own", () => {
+    const s = createFreeSession();
+    s.setTyped("lots of typing here");
+    expect(s.isComplete()).toBe(false);
+  });
+
+  it("reports speed, word count, and character count", () => {
+    const s = createFreeSession();
+    s.setTyped("the quick brown fox"); // 19 chars, 4 words
+    const stats = s.stats(60);
+    expect(stats.typedChars).toBe(19);
+    expect(stats.words).toBe(4);
+    // 19 chars / 5 = 3.8 "words"; over 1 minute that rounds to 4 WPM.
+    expect(stats.wpm).toBe(4);
   });
 });

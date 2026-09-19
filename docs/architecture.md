@@ -50,7 +50,10 @@ browser, and it keeps the UI a thin adapter.
   by mixing all of them.
 - **`engine.js`** -- `createSession(target)`, a state machine that tracks what has
   been typed, counts errors (corrected mistakes still count), and reports
-  per-character render states via `CharState`.
+  per-character render states via `CharState`. Also `createFreeSession()` for
+  free-typing mode (no target: it stores anything typed and reports raw speed,
+  word count, and character count). Both expose a `mode` (`Mode.PASSAGE` /
+  `Mode.FREE`) so the UI knows which to render.
 
 ### `src/ui` (DOM glue)
 

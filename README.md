@@ -3,7 +3,8 @@
 A small, mobile-friendly typing speed test. Pick a duration and a topic, then
 copy as much of the passage as you can before the clock runs out. Passages are
 assembled fresh from themed sentence pools each round, so they effectively never
-repeat.
+repeat. There is also a **free typing** mode: skip the passage and type anything
+you like for the time limit, and it just reports your speed at the end.
 
 This project started life as a single HTML file and has been restructured into a
 tested, modular codebase that is easy to extend -- especially with **new text

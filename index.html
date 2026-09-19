@@ -39,8 +39,15 @@
       <!-- Setup -->
       <div class="overlay" id="setup">
         <h1>Typing Speed Test</h1>
-        <p class="sub">Copy as much of the passage as you can before the clock runs out.</p>
-        <div class="label">Choose a time</div>
+        <p class="sub" id="setupSub">
+          Copy as much of the passage as you can before the clock runs out.
+        </p>
+        <div class="label">Mode</div>
+        <div class="times" id="modes">
+          <div class="chip sel" data-mode="passage">Copy a passage</div>
+          <div class="chip" data-mode="free">Free typing</div>
+        </div>
+        <div class="label" style="margin-top: 18px">Choose a time</div>
         <div class="times" id="times">
           <div class="chip" data-sec="15">15 sec</div>
           <div class="chip sel" data-sec="30">30 sec</div>
@@ -59,7 +66,7 @@
           />
           <span>seconds</span>
         </div>
-        <div class="picker">
+        <div class="picker" id="picker">
           <div class="label">Topic</div>
           <select id="themeSel" class="select"></select>
         </div>
@@ -75,10 +82,11 @@
       <div class="overlay hidden" id="results">
         <div class="score"><span id="doneNote"></span></div>
         <div class="score" id="finalWpm">0<span> WPM</span></div>
-        <div class="grid">
-          <div class="stat err"><b id="finalErr">0</b><small>errors</small></div>
-          <div class="stat"><b id="finalAcc">0%</b><small>accuracy</small></div>
-          <div class="stat"><b id="finalChars">0</b><small>characters</small></div>
+        <div class="grid" id="resultGrid">
+          <div class="stat err" id="statErr"><b id="finalErr">0</b><small>errors</small></div>
+          <div class="stat" id="statAcc"><b id="finalAcc">0%</b><small>accuracy</small></div>
+          <div class="stat" id="statWords" hidden><b id="finalWords">0</b><small>words</small></div>
+          <div class="stat" id="statChars"><b id="finalChars">0</b><small>characters</small></div>
         </div>
         <button class="btn" id="againBtn">Try again</button>
         <button class="btn ghost" id="changeBtn">Change time</button>
