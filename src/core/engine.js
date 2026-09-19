@@ -12,7 +12,7 @@
  * added characters that do not match the target are tallied as errors. Deleting
  * and retyping therefore counts the new attempt again.
  */
-import { computeStats } from "./stats.js";
+import { computeStats, computeWpm, countWords } from "./stats.js";
 
 /** Per-character render states. */
 export const CharState = Object.freeze({
@@ -24,6 +24,14 @@ export const CharState = Object.freeze({
   INCORRECT: "incorrect",
   /** The caret position (next character to type). */
   CURRENT: "current",
+});
+
+/** Session modes. */
+export const Mode = Object.freeze({
+  /** Copy a fixed passage; correctness and accuracy are measured. */
+  PASSAGE: "passage",
+  /** Type anything for the time limit; only raw speed is measured. */
+  FREE: "free",
 });
 
 /**
@@ -43,6 +51,11 @@ export function createSession(target) {
   let prevLength = 0;
 
   return {
+    /** Which mode this session is. @returns {string} */
+    get mode() {
+      return Mode.PASSAGE;
+    },
+
     /** The target passage. @returns {string} */
     get target() {
       return target;
@@ -115,6 +128,59 @@ export function createSession(target) {
      */
     stats(elapsedSeconds) {
       return computeStats({ typed, target, elapsedSeconds, errors });
+    },
+  };
+}
+
+/**
+ * Create a free-typing session: the user types anything they like for the time
+ * limit, and only raw speed is measured. There is no target, so there is no
+ * concept of correctness, accuracy, errors, or per-character state -- every
+ * typed character counts toward the speed.
+ */
+export function createFreeSession() {
+  let typed = "";
+
+  return {
+    /** Which mode this session is. @returns {string} */
+    get mode() {
+      return Mode.FREE;
+    },
+
+    /** What has been typed so far. @returns {string} */
+    get typed() {
+      return typed;
+    },
+
+    /** Free typing never ends on its own -- only the clock stops it. @returns {boolean} */
+    isComplete() {
+      return false;
+    },
+
+    /**
+     * Store the latest value from the input field. Nothing is clamped or
+     * validated -- anything goes.
+     * @param {string} value
+     * @returns {string}
+     */
+    setTyped(value) {
+      typed = value;
+      return typed;
+    },
+
+    /**
+     * Snapshot the run's statistics at a given elapsed time. Free mode reports
+     * words per minute (all typed characters count), plus word and character
+     * totals.
+     * @param {number} elapsedSeconds
+     * @returns {{ wpm: number, typedChars: number, words: number }}
+     */
+    stats(elapsedSeconds) {
+      return {
+        wpm: computeWpm(typed.length, elapsedSeconds),
+        typedChars: typed.length,
+        words: countWords(typed),
+      };
     },
   };
 }

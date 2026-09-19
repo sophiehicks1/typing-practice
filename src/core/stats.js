@@ -55,6 +55,18 @@ export function computeAccuracy(correctChars, typedLength) {
 }
 
 /**
+ * Count whitespace-separated words in a string. Used by free-typing mode, where
+ * there is no target to compare against.
+ *
+ * @param {string} text
+ * @returns {number}
+ */
+export function countWords(text) {
+  const trimmed = text.trim();
+  return trimmed === "" ? 0 : trimmed.split(/\s+/).length;
+}
+
+/**
  * Compute the full set of live/final stats for a run.
  *
  * @param {Object} args

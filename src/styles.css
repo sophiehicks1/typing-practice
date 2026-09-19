@@ -370,6 +370,16 @@ body {
   max-width: 340px;
   margin-top: 26px;
 }
+/* Free-typing results show two tiles (words + characters) instead of three. */
+.grid.free {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 240px;
+}
+
+/* Utility: hide an element regardless of its default display. */
+.is-hidden {
+  display: none !important;
+}
 .stat {
   background: var(--surface);
   border: 1px solid var(--line);
