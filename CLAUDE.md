@@ -56,9 +56,13 @@ npm run build      # static production build -> dist/
 - `src/core/time.js` -- countdown + clock formatting.
 - `src/core/passage.js` -- passage assembly (`pickPassage`, `buildFromTopic`,
   `buildMixed`).
+- `src/core/history.js` -- score history + smoothing (EMA) + progress-chart
+  geometry (`chartLayout`).
 - `src/core/engine.js` -- typing session state machine (`createSession`,
   `CharState`).
 - `src/ui/passage-view.js` -- renders characters + states to DOM.
+- `src/ui/progress-chart.js` -- draws the WPM progress chart (SVG).
+- `src/ui/history-store.js` -- persists history in localStorage.
 - `src/ui/app.js` -- wires core to the page.
 - `src/main.js` -- entry point.
 

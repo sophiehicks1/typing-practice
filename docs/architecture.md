@@ -48,6 +48,10 @@ browser, and it keeps the UI a thin adapter.
 - **`passage.js`** -- `buildFromTopic`, `buildMixed`, and `pickPassage`. Assembles
   a passage of at least `MIN_PASSAGE_LENGTH` characters, either from one topic or
   by mixing all of them.
+- **`history.js`** -- `sanitizeHistory`, `addResult`, `smooth` (exponential
+  moving average), and `chartLayout`, which turns a list of WPM scores into
+  plot coordinates for the raw scores, the smoothed average, and the y-axis
+  ticks.
 - **`engine.js`** -- `createSession(target)`, a state machine that tracks what has
   been typed, counts errors (corrected mistakes still count), and reports
   per-character render states via `CharState`. Also `createFreeSession()` for
@@ -59,6 +63,11 @@ browser, and it keeps the UI a thin adapter.
 
 - **`passage-view.js`** -- the only module that turns `CharState` values into DOM
   classes. Efficiently updates only the spans whose state could have changed.
+- **`progress-chart.js`** -- renders the results-screen progress chart as an
+  inline SVG (dots for each test, a line for the smoothed average) with a
+  hover/tap tooltip. Geometry comes from `core/history.js`.
+- **`history-store.js`** -- loads and saves past results in `localStorage`,
+  tolerating missing, corrupt, or unavailable storage.
 - **`app.js`** -- the controller. Reads settings from the setup screen, drives the
   countdown interval, feeds input into the engine, and renders results. It
   contains no game math -- it delegates all of that to `src/core`.

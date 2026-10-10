@@ -9,6 +9,8 @@ import { createSession, createFreeSession, Mode } from "../core/engine.js";
 import { pickPassage, RANDOM_TOPIC_ID } from "../core/passage.js";
 import { remainingSeconds, formatClock } from "../core/time.js";
 import { createPassageView } from "./passage-view.js";
+import { createProgressChart } from "./progress-chart.js";
+import { loadHistory, recordResult } from "./history-store.js";
 
 /** How often the countdown clock ticks, in milliseconds. */
 const TICK_MS = 100;
@@ -49,6 +51,7 @@ export function startApp() {
     finalWords: byId("finalWords"),
     finalChars: byId("finalChars"),
     doneNote: byId("doneNote"),
+    progress: byId("progress"),
     startBtn: byId("startBtn"),
     againBtn: byId("againBtn"),
     changeBtn: byId("changeBtn"),
@@ -60,6 +63,7 @@ export function startApp() {
   };
 
   const passageView = createPassageView(els.text);
+  const progressChart = createProgressChart(els.progress);
 
   // ----- Session state -----
   let duration = DEFAULT_DURATION;
@@ -71,6 +75,7 @@ export function startApp() {
   let finished = false;
   let startTime = 0;
   let tick = null;
+  let history = loadHistory();
 
   // ----- Keyboard-aware sizing (mobile) -----
   function fit() {
@@ -171,6 +176,17 @@ export function startApp() {
       els.finalAcc.textContent = stats.accuracy + "%";
       els.doneNote.textContent = completed ? "Passage finished early. Nice." : "";
     }
+
+    // Only runs where something was typed count toward progress.
+    if (started) {
+      history = recordResult(history, {
+        wpm: stats.wpm,
+        mode: session.mode,
+        duration,
+        at: Date.now(),
+      });
+    }
+    progressChart.render(history);
 
     els.setup.classList.add("hidden");
     els.results.classList.remove("hidden");
