@@ -23,11 +23,13 @@ topics**.
 <p align="center"><em>Setup &middot; a test in progress &middot; results</em></p>
 
 From the **setup** screen you pick a mode (copy a passage or free typing), a time
-limit and a topic (and optionally let your keyboard autocorrect). During a
+limit and a topic (autocorrect is on by default; switch it off to type without your keyboard's help). During a
 **test**, the clock counts down while your live WPM and accuracy update and each
 character turns green as you type it correctly. When time runs out -- or you
 finish the passage -- the **results** screen shows your WPM alongside errors,
-accuracy, and total characters typed.
+accuracy, and total characters typed, plus a **progress chart** of your recent
+scores with a smoothed average line (history is kept in your browser's local
+storage).
 
 ## Quick start
 
